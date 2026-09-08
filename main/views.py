@@ -30,14 +30,16 @@ def show_main(request):
 def show_experience(request):
     context = {
         "name": "Rois",
+        "short_name": "Rois",
         "experience_list": Experience.objects.all(),
     }
     return render(request, "experience.html", context)
 
 def show_projects(request):
-    projects = Project.objects.all()  # sesuaikan sama model kamu
+    projects = Project.objects.all()  
     context = {
-        "name": "Rois",  # atau variabel yang sudah kamu pakai
+        "name": "Rois",  
+        "short_name": "Rois",
         "projects": projects,
     }
     return render(request, "projects.html", context)
