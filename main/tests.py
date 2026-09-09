@@ -1,8 +1,8 @@
-from django.test import TestCase
+from django.test import TestCase, Client
 from django.urls import reverse
 from django.utils import timezone
 
-from main.models import Experience
+from main.models import Experience, Skill, Project
 # Create your tests here.
 
 class MainTest(TestCase):
@@ -56,3 +56,31 @@ class MainTest(TestCase):
         self.assertFalse(self.experience.is_ongoing)
         self.assertContains(response, "Selesai")
         self.assertNotContains(response, "Sedang berlangsung")
+        
+class ProjectViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.url = reverse('main:show_projects')  
+
+    def test_projects_url_and_template(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'projects.html')  
+
+    def test_projects_view_with_data(self):
+        Project.objects.create(
+            title="Portfolio Website",
+            description="Website portofolio dengan Django",
+            tags="Django, Python",
+            link="https://github.com/example/portfolio"
+        )
+        
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Portfolio Website")
+        self.assertContains(response, "Website portofolio dengan Django")
+        
+    def test_projects_view_empty_state(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "No projects added yet.")
