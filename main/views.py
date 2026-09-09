@@ -21,17 +21,26 @@ def show_main(request):
             {"name": "LinkedIn", "url": "https://www.linkedin.com/in/roisul-umam-83577b302/?locale=en"},
             {"name": "Email", "url": "mailto:umamr545@gmail.com"}
         ],
+        "navigation_links": [
+                    {"name": "Profile", "url_name": "main:show_main"},
+                    {"name": "Experience", "url_name": "main:show_experience"},
+                    {"name": "Projects", "url_name": "main:show_projects"},
+                ],
         "skills": skills,
         "projects": projects,
     }
     return render(request, "index.html", context)
-
 
 def show_experience(request):
     context = {
         "name": "Rois",
         "short_name": "Rois",
         "experience_list": Experience.objects.all(),
+        "navigation_links": [
+                    {"name": "Profile", "url_name": "main:show_main"},
+                    {"name": "Experience", "url_name": "main:show_experience"},
+                    {"name": "Projects", "url_name": "main:show_projects"},
+                ],
     }
     return render(request, "experience.html", context)
 
@@ -41,5 +50,10 @@ def show_projects(request):
         "name": "Rois",  
         "short_name": "Rois",
         "projects": projects,
+        "navigation_links": [
+                    {"name": "Profile", "url_name": "main:show_main"},
+                    {"name": "Experience", "url_name": "main:show_experience"},
+                    {"name": "Projects", "url_name": "main:show_projects"},
+                ],
     }
     return render(request, "projects.html", context)
