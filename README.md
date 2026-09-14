@@ -70,7 +70,7 @@ Beberapa keterbatasan yang disadari dari hasil AI dan perlu ditinjau ulang secar
 ## Penyesuaian Manual yang Dilakukan
 - Mengganti seluruh konten placeholder project dengan data project asli (nama, deskripsi, tech stack, link repo).
 - Menyesuaikan jumlah dan urutan skill sesuai kemampuan yang benar-benar saya kuasai.
-- Melakukan pengecekan tampilan di beberapa ukuran layar (mobile, tablet, desktop) dan memperbaiki [sebutkan bagian yang diperbaiki, misal: spacing pada mobile / warna kontras tag].
+- Melakukan pengecekan tampilan di beberapa ukuran layar (mobile, tablet, desktop).
 - Me-refactor konten yang sebelumnya di-hardcode di HTML (bio, skills, projects) menjadi data yang dikirim dari `views.py` sebagai context, lalu ditampilkan di template menggunakan Django template tag (`{{ }}` dan `{% for %}`).
 - Menyesuaikan struktur dict di `views.py` dengan data project dan skill saya yang sebenarnya.
 
