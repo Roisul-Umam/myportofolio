@@ -1,3 +1,4 @@
+{% extends "base.html" %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,6 +22,7 @@
         </div>
     </header>
 
+    {% block content %}
     <main>
         <section class="experience-section" id="experience">
             <div class="container">
@@ -46,13 +48,14 @@
                         </article>
                     {% empty %}
                         <p class="empty-state">
-                            Belum ada pengalaman yang ditambahkan.
+                            No experience added yet.
                         </p>
                     {% endfor %}
                 </div>
             </div>
         </section>
     </main>
+    {% endblock content %}
 
     <footer class="site-footer">
         <div class="container">

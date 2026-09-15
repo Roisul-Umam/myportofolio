@@ -37,8 +37,9 @@ class Skill(models.Model):
 class Project(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
-    tags = models.CharField(max_length=200) # Disimpan sebagai: "Django, Python, CSS"
+    tags = models.CharField(max_length=200) 
     link = models.URLField(blank=True, null=True)
+    project_image_url = models.URLField(blank=True, null=True)
 
     @property
     def get_tags_list(self):

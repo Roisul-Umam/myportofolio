@@ -323,6 +323,15 @@ h1, h2, .brand {
     transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
+.project-image {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--glass-border);
+    margin-bottom: 1rem;
+}
+
 .project-card:hover {
     transform: translateY(-4px);
     border-color: rgba(255, 255, 255, 0.55);
@@ -369,6 +378,93 @@ h1, h2, .brand {
 .project-link:hover {
     color: var(--accent-dark);
     text-decoration: underline;
+}
+
+/* ---------- Project page header (title + add button) ---------- */
+.project-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.project-header h1 {
+    margin: 0;
+}
+
+/* ---------- Project search bar ---------- */
+.project-search {
+    display: flex;
+    gap: 0.6rem;
+    margin-bottom: 2rem;
+}
+
+.project-search__input {
+    flex: 1;
+    padding: 0.65rem 1rem;
+    background: var(--glass, rgba(255, 255, 255, 0.1));
+    backdrop-filter: var(--blur, blur(18px));
+    -webkit-backdrop-filter: var(--blur, blur(18px));
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.3));
+    border-radius: var(--radius, 12px);
+    font: inherit;
+    color: var(--ink, #fff);
+}
+
+.project-search__input::placeholder {
+    color: var(--text-muted, rgba(255, 255, 255, 0.65));
+}
+
+.project-search__input:focus {
+    outline: 2px solid rgba(255, 255, 255, 0.6);
+    outline-offset: 1px;
+    background: var(--glass-strong, rgba(255, 255, 255, 0.16));
+}
+
+/* Tombol Search & Add Project: gaya glass, radius samain sama search input */
+.project-search .button,
+.project-add-button {
+    background: var(--glass, rgba(255, 255, 255, 0.1));
+    backdrop-filter: var(--blur, blur(18px));
+    -webkit-backdrop-filter: var(--blur, blur(18px));
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.3));
+    border-radius: var(--radius, 12px);
+    color: var(--ink, #fff);
+    box-shadow: none;
+}
+
+.project-search .button:hover,
+.project-add-button:hover {
+    background: var(--glass-strong, rgba(255, 255, 255, 0.2));
+    transform: translateY(-2px);
+}
+
+.project-add-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+/* ---------- Project image di dalam card ---------- */
+.project-image {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    border-radius: var(--radius-sm, 8px);
+    margin-bottom: 1rem;
+}
+
+/* ---------- Aksi di card (tombol view/hapus) ---------- */
+.project-card-actions {
+    margin-top: 1rem;
+}
+
+.project-actions {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
 }
 
 /* ---------- Experience timeline ---------- */
@@ -493,4 +589,198 @@ h1, h2, .brand {
 a:focus-visible {
     outline: 2px solid #ffffff;
     outline-offset: 2px;
+}
+
+/* ---------- Projects Form ---------- */
+.project-form {
+    width: 100%;
+    max-width: 100%;
+    margin-top: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.7rem 0.9rem;
+    background: var(--glass);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    font: inherit;
+    color: var(--ink);
+    transition:
+        border-color 0.2s ease,
+        outline-color 0.2s ease,
+        background-color 0.2s ease;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: var(--text-muted);
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: 2px solid rgba(255, 255, 255, 0.6);
+    outline-offset: 1px;
+    border-color: rgba(255, 255, 255, 0.55);
+    background: var(--glass-strong);
+}
+
+.form-error {
+    color: #ffb4a8;
+    font-size: 0.85rem;
+    margin-top: 0.35rem;
+}
+
+.button {
+    display: inline-block;
+    height: fit-content;
+    border: 0;
+    border-radius: var(--radius);
+    padding: 0.65rem 1.2rem;
+    background: var(--ink);
+    color: #0c2a63;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: var(--glass-shadow);
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.button:hover {
+    background: var(--accent-dark);
+    transform: translateY(-2px);
+}
+
+.button-secondary {
+    background: var(--glass-strong);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border: 1px solid var(--glass-border);
+    color: var(--ink);
+    box-shadow: none;
+}
+
+.button-secondary:hover {
+    background: rgba(255, 255, 255, 0.28);
+    transform: translateY(-2px);
+}
+
+/* ---------- Delete confirmation modal (Popover API) ---------- */
+.project-delete-modal {
+    position: fixed;
+    inset: 0;
+    margin: auto;
+    padding: 0;
+    border: none;
+    background: transparent;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.project-delete-modal:popover-open {
+    display: flex;
+}
+
+.project-delete-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: rgba(4, 12, 32, 0.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    cursor: pointer;
+    padding: 0;
+}
+
+.project-delete-modal__content {
+    position: relative;
+    z-index: 1;
+    width: 90%;
+    max-width: 380px;
+    background: var(--glass-strong);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    box-shadow: var(--glass-shadow);
+    padding: 1.75rem;
+    color: var(--ink);
+}
+
+.project-delete-modal__content h2 {
+    font-family: "Space Grotesk", -apple-system, sans-serif;
+    font-size: 1.2rem;
+    margin-bottom: 0.75rem;
+}
+
+.project-delete-modal__content p {
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+}
+
+.project-delete-modal__content p strong {
+    color: var(--ink);
+}
+
+.project-delete-modal__close {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--glass-border);
+    border-radius: 50%;
+    background: var(--glass);
+    color: var(--ink);
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.project-delete-modal__close:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.project-delete-modal__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.6rem;
+}
+
+.project-delete-modal__actions form {
+    display: contents;
+}
+
+/* ---------- Danger button (dipakai untuk aksi hapus) ---------- */
+.button-danger {
+    background: rgba(255, 90, 90, 0.85);
+    color: #ffffff;
+}
+
+.button-danger:hover {
+    background: #ff5a5a;
 }

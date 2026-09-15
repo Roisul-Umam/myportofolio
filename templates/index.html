@@ -1,3 +1,4 @@
+{% extends "base.html" %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,7 +13,7 @@
 <body>
     <header class="site-header">
         <div class="container">
-            <a href="{% url 'main:show_main' %}" class="brand">{{ short_name }} Website</a>
+            <a href="{% url 'main:show_main' %}" class="brand">{{ short_name }} - Website</a>
             <nav>
                 {% for link in navigation_links %}
                     <a href="{% url link.url_name %}">{{ link.name }}</a>
@@ -21,6 +22,7 @@
         </div>
     </header>
 
+    {% block content %}
     <main>
         <section class="hero" id="profile">
             <div class="container hero-grid">
@@ -70,7 +72,7 @@
             </div>
         </section>
     </main>
-
+    {% endblock content %}
     <footer class="site-footer">
         <div class="container">
             <p>&copy; 2026 {{ name }}. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
