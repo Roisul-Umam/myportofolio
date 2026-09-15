@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block meta %}
+    <title>Login - {{ name }}</title>
+{% endblock meta %}
+{% block content %}
+    <main>
+        <section class="login-section">
+            <div class="login-card">
+                <p class="section-kicker">Welcome back</p>
+                <h1>Login</h1>
+                <form method="post" class="project-form">
+                    {% csrf_token %}
+                    {% if form.errors %}
+                        <p class="form-error">Username or password is incorrect.</p>
+                    {% endif %}
+                    {% for field in form %}
+                        <div class="form-group">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                        </div>
+                    {% endfor %}
+                    <button type="submit" class="button login-button">Login</button>
+                </form>
+            </div>
+        </section>
+    </main>
+{% endblock content %}

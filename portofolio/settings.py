@@ -79,6 +79,9 @@ CSRF_TRUSTED_ORIGINS = [
     'http://roisul-umam-myportofolio.pws.cs.ui.ac.id',
 ]
 
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = 'main:show_projects'
+
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
