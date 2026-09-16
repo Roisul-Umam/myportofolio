@@ -84,6 +84,7 @@ def create_project(request):
 
     context = {
         "name": "Rois",
+        "short_name": "Rois",
         "form": form,
     }
     return render(request, "projects_form.html", context)
@@ -100,6 +101,7 @@ def edit_project(request, project_id):
  
     context = {
         "name": "Rois",
+        "short_name": "Rois",
         "form": form,
         "project": project,
     }

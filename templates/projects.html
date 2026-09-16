@@ -40,15 +40,19 @@
                             <span class="experience-category">{{ project.category }}</span>
                             <p class="experience-description">{{ project.description }}</p>
                             <div class="project-card-actions">
-                                <div class="project-actions">
-                                    {% if project.project_url %}
-                                        <a href="{{ project.project_url }}" class="button">View Project</a>
-                                    {% endif %}
-                                    {% if user.is_authenticated %}
+                                {% if project.project_url %}
+                                    <a href="{{ project.project_url }}" target="_blank" rel="noopener noreferrer" class="project-link">View Project &rarr;</a>
+                                {% elif project.url %}
+                                    <a href="{{ project.url }}" target="_blank" rel="noopener noreferrer" class="project-link">View Project &rarr;</a>
+                                {% elif project.link %}
+                                    <a href="{{ project.link }}" target="_blank" rel="noopener noreferrer" class="project-link">View Project &rarr;</a>
+                                {% endif %}
+                                {% if user.is_authenticated %}
+                                    <div class="project-admin-actions">
                                         <a href="{% url 'main:edit_project' project.id %}" class="button button-secondary">Edit</a>
                                         {% include "components/project_delete_modal.html" with project=project %}
-                                    {% endif %}
-                                </div>
+                                    </div>
+                                {% endif %}
                             </div>
                         </article>
                     {% empty %}
