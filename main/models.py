@@ -29,9 +29,26 @@ class Experience(models.Model):
     
 class Skill(models.Model):
     name = models.CharField(max_length=50)
+    icon_class = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="Contoh: devicon-python-plain (lihat devicon.dev)",
+    )
+    icon_url = models.URLField(
+        blank=True,
+        help_text="Link gambar sendiri (opsional). Kalau diisi, ini dipakai duluan, mengalahkan icon_class.",
+    )
+    capabilities = models.TextField(
+        blank=True,
+        help_text="Satu poin per baris, contoh:\nBasic Python\nBasic Pandas",
+    )
 
     def __str__(self):
         return self.name
+
+    @property
+    def capabilities_list(self):
+        return [c.strip() for c in self.capabilities.splitlines() if c.strip()]
 
 
 class Project(models.Model):

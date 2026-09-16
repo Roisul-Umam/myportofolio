@@ -15,6 +15,7 @@ def show_main(request):
         "short_name": "Rois",
         "npm": "2506620210",
         "avatar_url": "/static/img/rois.jpg",
+        "avatar_url_back": "/static/img/rois_2.jpg",
         "kicker": "Computer Science · Universitas Indonesia",
         "study_program": "S1 Ilmu Komputer",
         "bio": (
@@ -23,9 +24,9 @@ def show_main(request):
             "understanding the systems behind large-scale data processing."
         ),
         "social_links": [
-            {"name": "GitHub", "url": "https://github.com/Roisul-Umam"},
-            {"name": "LinkedIn", "url": "https://www.linkedin.com/in/roisul-umam-83577b302/?locale=en"},
-            {"name": "Email", "url": "mailto:umamr545@gmail.com"}
+            {"name": "GitHub", "url": "https://github.com/Roisul-Umam", "display": "Roisul-Umam", "icon": "fa-brands fa-github"},
+            {"name": "LinkedIn", "url": "https://www.linkedin.com/in/roisul-umam-83577b302/?locale=en", "display": "Roisul Umam", "icon": "fa-brands fa-linkedin"},
+            {"name": "Email", "url": "mailto:umamr545@gmail.com", "display": "umamr545@gmail.com", "icon": "fa-solid fa-envelope"},
         ],
         "navigation_links": [
                     {"name": "Profile", "url_name": "main:show_main"},

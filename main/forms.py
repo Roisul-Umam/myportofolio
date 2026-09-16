@@ -1,7 +1,24 @@
 import re
 from django.forms import ModelForm, TextInput, Textarea, URLInput
-from main.models import Project
+from main.models import Project, Skill
 
+def convert_drive_link_to_thumbnail(url):
+    if not url:
+        return url
+
+    patterns = [
+        r"drive\.google\.com/file/d/([a-zA-Z0-9_-]+)",
+        r"drive\.google\.com/open\?id=([a-zA-Z0-9_-]+)",
+        r"drive\.google\.com/uc\?id=([a-zA-Z0-9_-]+)",
+    ]
+
+    for pattern in patterns:
+        match = re.search(pattern, url)
+        if match:
+            file_id = match.group(1)
+            return f"https://drive.google.com/thumbnail?id={file_id}&sz=w1000"
+
+    return url
 
 class ProjectForm(ModelForm):
     class Meta:
@@ -71,3 +88,23 @@ class ProjectForm(ModelForm):
                 return f"https://drive.google.com/thumbnail?id={file_id}&sz=w1000"
 
         return url
+    
+class SkillForm(ModelForm):
+    class Meta:
+        model = Skill
+        fields = ["name", "icon_class", "icon_url", "capabilities"]
+        labels = {
+            "name": "Nama Skill",
+            "icon_class": "Icon Class (devicon)",
+            "icon_url": "Icon Custom (link Google Drive atau link gambar langsung)",
+            "capabilities": "Kemampuan (satu poin per baris)",
+        }
+        widgets = {
+            "icon_url": URLInput(
+                attrs={"placeholder": "Paste link share Google Drive di sini, contoh: https://drive.google.com/file/d/xxxx/view?usp=sharing"}
+            ),
+            "capabilities": Textarea(attrs={"rows": 4, "placeholder": "Basic Python\nBasic Pandas"}),
+        }
+
+    def clean_icon_url(self):
+        return convert_drive_link_to_thumbnail(self.cleaned_data.get("icon_url"))
