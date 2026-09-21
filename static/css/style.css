@@ -134,6 +134,23 @@ h1, h2, .brand {
     background: rgba(255, 255, 255, 0.18);
 }
 
+.site-header nav a.active {
+    background: #ffffff;
+    color: #0c2a63;
+    view-transition-name: nav-pill;
+}
+
+::view-transition-group(nav-pill) {
+    animation-duration: 0.35s;
+}
+
+.nav-user {
+    color: var(--ink);
+    font-size: 0.9rem;
+    font-weight: 700;
+    padding: 0.45rem 0.5rem;
+}
+
 /* ---------- Hero ---------- */
 .hero {
     padding: 7rem 0 4rem;
@@ -806,6 +823,44 @@ h1, h2, .brand {
     display: contents;
 }
 
+.star-form {
+    display: inline;
+}
+
+.button-star {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    padding: 0.65rem 1.2rem;
+    background: var(--glass-strong);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    color: var(--ink);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.button-star:hover {
+    transform: translateY(-2px);
+}
+
+.button-star.is-starred {
+    background: rgba(255, 200, 87, 0.85);
+    color: #1a1a1a;
+    border-color: rgba(255, 200, 87, 0.85);
+}
+
+.star-count {
+    padding: 0.05rem 0.5rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.25);
+    font-size: 0.8rem;
+}
+
 /* ---------- Forms & Buttons (Shared) ---------- */
 .form-group {
     margin-bottom: 1.25rem;
@@ -1053,6 +1108,16 @@ h1, h2, .brand {
         animation: none;
         transform: none;
     }
+}
+
+@view-transition {
+    navigation: auto;
+}
+
+.form-help {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.3rem;
 }
 
 /* visible keyboard focus */

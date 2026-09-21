@@ -1,5 +1,6 @@
 import uuid
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
 class Experience(models.Model):
@@ -57,6 +58,7 @@ class Project(models.Model):
     tags = models.CharField(max_length=200) 
     link = models.URLField(blank=True, null=True)
     project_image_url = models.URLField(blank=True, null=True)
+    starred_by = models.ManyToManyField(User, related_name='starred_projects', blank=True)
 
     @property
     def get_tags_list(self):
