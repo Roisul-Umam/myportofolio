@@ -25,9 +25,10 @@ def show_main(request):
         "kicker": "Computer Science · Universitas Indonesia",
         "study_program": "S1 Ilmu Komputer",
         "bio": (
-            "Computer Science student at Universitas Indonesia with a strong interest "
-            "in data engineering — turning raw data into meaningful insights and "
-            "understanding the systems behind large-scale data processing."
+            "CS student at Universitas Indonesia on a mission to become a "
+            "Data Engineer. I love turning messy, chaotic data into clean, "
+            "useful insights. Most of my time goes into building reliable data pipelines, "
+            "playing with distributed databases, and making sure backend systems run smoothly and scale well."
         ),
         "social_links": [
             {"name": "GitHub", "url": "https://github.com/Roisul-Umam", "display": "Roisul-Umam", "icon": "fa-brands fa-github"},
@@ -77,6 +78,8 @@ def show_projects(request):
                     {"name": "Projects", "url_name": "main:show_projects"},
                 ],
         "title_query": title_query,
+        "can_manage" : request.user.is_superuser,
+        "can_edit" : request.user.is_superuser or user_is_editor(request.user),
     }
     return render(request, "projects.html", context)
 
@@ -100,6 +103,8 @@ def create_project(request):
 
 @login_required(login_url="/login/")
 def edit_project(request, project_id):
+    if not (request.user.is_superuser or user_is_editor(request.user)):
+        raise PermissionDenied
     project = get_object_or_404(Project, pk=project_id)
     form = ProjectForm(request.POST or None, instance=project)
  
@@ -138,6 +143,8 @@ def get_projects_json(request):
 
 @login_required(login_url="/login/")
 def delete_project(request, project_id):
+    if not request.user.is_superuser:
+        raise PermissionDenied
     project = get_object_or_404(Project, pk=project_id)
 
     if request.method == "POST":
@@ -174,6 +181,8 @@ def login_user(request):
     }
     return render(request, "login.html", context)
 
+def user_is_editor(user):
+    return user.is_authenticated and user.groups.filter(name="Editor").exists()
 
 def logout_user(request):
     logout(request)
