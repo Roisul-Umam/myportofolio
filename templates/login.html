@@ -6,7 +6,7 @@
     <main>
         <section class="login-section">
             <div class="login-card">
-                <p class="section-kicker">Welcome back</p>
+                <p class="section-kicker">Welcome</p>
                 <h1>Login</h1>
                 <form method="post" class="project-form">
                     {% csrf_token %}
@@ -20,6 +20,7 @@
                         </div>
                     {% endfor %}
                     <button type="submit" class="button login-button">Login</button>
+                    <p class="register-prompt">Don't have an account? <a href="{% url 'main:register' %}">Register Here</a></p>
                 </form>
             </div>
         </section>

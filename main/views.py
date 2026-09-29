@@ -1,4 +1,5 @@
 import datetime
+import json
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.core.exceptions import PermissionDenied
@@ -6,11 +7,12 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.core import serializers
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.shortcuts import render
 from main.models import Experience, Skill, Project
 from main.forms import ProjectForm
+from django.views.decorators.http import require_POST
 # Create your views here.
 def show_main(request):
     last_login = request.COOKIES.get('last_login', 'Belum ada sesi login / Cookie tidak ditemukan')
@@ -60,26 +62,15 @@ def show_experience(request):
     return render(request, "experience.html", context)
 
 def show_projects(request):
-    json_response = get_projects_json(request)
-    projects = serializers.deserialize(
-        "json", 
-        json_response.content.decode("utf-8")
-    )
-    projects = [project.object for project in projects]
     title_query = request.GET.get("title", "").strip()
     
     context = {
-        "name": "Rois",  
+        "name": "Rois",
         "short_name": "Rois",
-        "project_list": projects,
-        "navigation_links": [
-                    {"name": "Profile", "url_name": "main:show_main"},
-                    {"name": "Experience", "url_name": "main:show_experience"},
-                    {"name": "Projects", "url_name": "main:show_projects"},
-                ],
         "title_query": title_query,
-        "can_manage" : request.user.is_superuser,
-        "can_edit" : request.user.is_superuser or user_is_editor(request.user),
+        "form": ProjectForm(),
+        "can_manage": request.user.is_superuser,
+        "can_edit": request.user.is_superuser or user_is_editor(request.user),
     }
     return render(request, "projects.html", context)
 
@@ -100,6 +91,24 @@ def create_project(request):
         "form": form,
     }
     return render(request, "projects_form.html", context)
+
+@require_POST
+def create_project_ajax(request):
+    if not request.user.is_superuser:
+        return JsonResponse(
+            {"message": "Hanya pemilik portofolio yang dapat menambahkan proyek."},
+            status=403,
+        )
+
+    form = ProjectForm(request.POST)
+    if form.is_valid():
+        project = form.save()
+        return JsonResponse(
+            {"message": "Proyek berhasil ditambahkan.", "pk": str(project.id)},
+            status=201,
+        )
+
+    return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
 
 @login_required(login_url="/login/")
 def edit_project(request, project_id):
@@ -133,13 +142,19 @@ def toggle_star(request, project_id):
 
 def get_projects_json(request):
     title_query = request.GET.get("title", "").strip()
-    projects = Project.objects.all()
-
+    projects = Project.objects.all().prefetch_related("starred_by")
     if title_query:
         projects = projects.filter(title__icontains=title_query)
+    projects = list(projects)
 
-    projects_json = serializers.serialize("json", projects, use_natural_foreign_keys=True)
-    return HttpResponse(projects_json, content_type="application/json")
+    data = json.loads(serializers.serialize("json", projects))
+    for item, project in zip(data, projects):
+        starred = list(project.starred_by.all())
+        item["fields"]["star_count"] = len(starred)
+        item["fields"]["starred_by_names"] = ", ".join(u.username for u in starred)
+        item["fields"]["is_starred"] = request.user in starred
+        item["fields"].pop("starred_by", None)
+    return JsonResponse(data, safe=False)
 
 @login_required(login_url="/login/")
 def delete_project(request, project_id):

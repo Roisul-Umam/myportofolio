@@ -2,6 +2,7 @@ from django.urls import path
 
 from main import views
 from main.views import (
+    create_project_ajax,
     delete_project,
     edit_project,
     get_projects_json,
@@ -28,4 +29,5 @@ urlpatterns = [
     path("register/", register, name="register"),
     path("login/", login_user, name="login"),
     path("logout/", logout_user, name="logout"),
+    path("projects/add-ajax/", create_project_ajax, name="create_project_ajax"),
 ]

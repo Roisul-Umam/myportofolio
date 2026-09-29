@@ -7,7 +7,7 @@
         <section class="login-section">
             <div class="login-card">
                 <p class="section-kicker">Join in</p>
-                <h1>Buat Akun</h1>
+                <h1>Create Account</h1>
                 <form method="post" action="{% url 'main:register' %}" class="project-form">
                     {% csrf_token %}
                     {% for error in form.non_field_errors %}
@@ -25,9 +25,9 @@
                             {% endfor %}
                         </div>
                     {% endfor %}
-                    <button type="submit" class="button login-button">Daftar</button>
+                    <button type="submit" class="button login-button">Register</button>
                 </form>
-                <p style="margin-top: 1rem; font-size: 0.85rem;">Sudah punya akun? <a href="{% url 'main:login' %}">Login di sini</a>.</p>
+                <p class="register-prompt">Already have an account? <a href="{% url 'main:login' %}">Login here</a>.</p>
             </div>
         </section>
     </main>
