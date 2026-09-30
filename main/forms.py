@@ -1,5 +1,7 @@
 import re
 from django.forms import ModelForm, TextInput, Textarea, URLInput
+from django.core.exceptions import ValidationError
+from django.utils.html import strip_tags
 from main.models import Project, Skill
 
 def convert_drive_link_to_thumbnail(url):
@@ -32,11 +34,11 @@ class ProjectForm(ModelForm):
         ]
 
         labels = {
-            "title": "Nama Proyek",
-            "description": "Deskripsi Proyek",
-            "tags": "Tag Proyek",
-            "link": "URL Proyek",
-            "project_image_url": "Gambar Proyek (link Google Drive atau link gambar langsung)",
+            "title": "Project Name",
+            "description": "Project Description",
+            "tags": "Project Tags",
+            "link": "Project Link",
+            "project_image_url": "Project Image URL",
         }
 
         widgets = {
@@ -64,7 +66,7 @@ class ProjectForm(ModelForm):
             ),
             "project_image_url": URLInput(
                 attrs={
-                    "placeholder": "Paste Google Drive link",
+                    "placeholder": "Paste (Google Drive link or direct image link) here",
                 }
             ),
         }
@@ -88,6 +90,17 @@ class ProjectForm(ModelForm):
                 return f"https://drive.google.com/thumbnail?id={file_id}&sz=w1000"
 
         return url
+    def clean_title(self):
+        title = strip_tags(self.cleaned_data["title"]).strip()
+        if not title:
+            raise ValidationError("Project name cannot be empty or contain only HTML tags.")
+        return title
+
+    def clean_tech_stack(self):
+        return strip_tags(self.cleaned_data["tech_stack"]).strip()
+
+    def clean_description(self):
+        return strip_tags(self.cleaned_data["description"]).strip()
     
 class SkillForm(ModelForm):
     class Meta:

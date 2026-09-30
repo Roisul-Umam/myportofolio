@@ -16,11 +16,19 @@
   <header class="site-header">
     <div class="container">
         <a href="{% url 'main:show_main' %}" class="brand">{{ short_name|default:"Rois" }} Website</a>
-        <nav>
-            <a href="{% url 'main:show_main' %}">Profile</a>
-            <a href="{% url 'main:show_experience' %}">Experience</a>
-            <a href="{% url 'main:show_projects' %}">Projects</a>
-        </nav>
+            <nav class="main-nav">
+                <span class="nav-pill" aria-hidden="true"></span>
+                {% for link in navigation_links %}
+                    <a href="{% url link.url_name %}" class="{% if request.resolver_match.view_name == link.url_name %}active{% endif %}">{{ link.name }}</a>
+                {% endfor %}
+                {% if user.is_authenticated %}
+                    <span class="nav-user">{{ user.username }}</span>
+                    <a href="{% url 'main:logout' %}" class="{% if request.resolver_match.view_name == 'main:logout' %}active{% endif %}">Logout</a>
+                {% else %}
+                    <a href="{% url 'main:login' %}" class="{% if request.resolver_match.view_name == 'main:login' %}active{% endif %}">Login</a>
+                    <a href="{% url 'main:register' %}" class="{% if request.resolver_match.view_name == 'main:register' %}active{% endif %}">Register</a>
+                {% endif %}
+            </nav>
     </div>
   </header>
   {% block content %} {% endblock content %}
@@ -30,5 +38,33 @@
           <p>&copy; 2026 {{ name }}. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
       </div>
   </footer>
+  {% include 'components/toast.html' %}
+  <script>
+  (() => {
+      const nav = document.querySelector('.main-nav');
+      if (!nav) return;
+      const pill = nav.querySelector('.nav-pill');
+      const links = [...nav.querySelectorAll('a')];
+      const active = nav.querySelector('a.active');
+      function movePill(target, instant = false) {
+          if (!target) return;
+          const nr = nav.getBoundingClientRect();
+          const r = target.getBoundingClientRect();
+          pill.classList.toggle('no-transition', instant);
+          pill.style.width = `${r.width}px`;
+          pill.style.height = `${r.height}px`;
+          pill.style.transform = `translate(${r.left - nr.left}px, ${r.top - nr.top}px)`;
+      }
+      if (active) movePill(active, true); else pill.classList.add('hidden');
+      links.forEach(link => link.addEventListener('mouseenter', () => {
+          pill.classList.remove('hidden');
+          movePill(link);
+      }));
+      nav.addEventListener('mouseleave', () => {
+          if (active) movePill(active); else pill.classList.add('hidden');
+      });
+      window.addEventListener('resize', () => { if (active) movePill(active, true); });
+  })();
+  </script>
 </body>
 </html>

@@ -28,7 +28,7 @@ Portofolio ini dibangun menggunakan HTML dan CSS dengan framework Django. Terdir
 
 ## Rencana Pengembangan (Roadmap)
 - [ ] Menambahkan page "Education"
-- [ ] Menambahkan animasi pada web
+- [ ] Menambahkan animasi pada web menggunakan JavaScript
 - [ ] Membuat button switch mode
 - [ ] Menghubungkan form kontak yang langsung terkirim ke hp lewat aplikasi buatan
 
@@ -59,7 +59,7 @@ S1 Ilmu Komputer, Fakultas Ilmu Komputer, Universitas Indonesia
 2. JSON lebih ringkas, gakaya XML sebagai perbandingan, contoh XML = `<project><title>Rainfall data model</title><tech_stack>Python, Kaggle</tech_stack></project>` dan kalo JSON = `projects_json = serializers.serialize("json", projects)` trus yang kedua adalah native ke JS jd kalo nanti aku bikin fitur di FE yg fetch data dari API projects, tinggal pake JS fetch() aja nah nanti result JSON nya bisa langsung dipake sebagai object JS.
 3. Alur di view nya adalah kita ngetik misal `api/projects` trus nanti views nge return data dari database pake ORM trus nanti datanya di serialize dari py ke JSON nah nanti view nge return balik barupa response kayak `HttpResponse(data, content_type="application/json")`. Nah alasan kenapa harus pake serialize simplenya buat nge penerjemah yg ngubah objek python jadi format teks JSON supaya bisa dikirim lewat HTTP dan browser bisa ngerti itu.
 
-## AI Disclosure Tugas 1&2
+## AI Disclosure Tugas 1 & 2
 
 Bagian *"Skills & Projects"* pada portofolio ini dikembangkan dengan bantuan AI assistant (Claude, Anthropic) untuk mempercepat proses penulisan HTML dan CSS awal.
 
@@ -113,3 +113,32 @@ AI membantu aku untuk memastikan fitur Create, Update, Delete, dan JSON serializ
 ### Kesimpulan
 
 AI digunakan sebagai alat bantu untuk mempercepat penulisan boilerplate kode dan menjelaskan konsep teknis di balik implementasi Create, Update, Delete, dan JSON. Namun, seluruh proses pengujian, debugging berdasarkan observasi langsung di lingkungan saya sendiri, identifikasi celah keamanan, verifikasi kesesuaian dengan requirement tugas, dan pengambilan keputusan desain akhir tetap saya lakukan secara aktif dan mandiri. AI tidak memiliki akses langsung ke aplikasi saya, sehingga peran saya dalam menjalankan, menguji, dan memverifikasi setiap perubahan menjadi bagian yang tidak tergantikan dari keseluruhan proses pengerjaan tugas ini.
+
+## AI Disclosure Tugas 4
+
+AI membantu aku untuk mengimplementasikan sistem autentikasi, session/cookie (`last_login`), dan permission berbasis peran (anonymous, pengguna biasa, editor, superuser)
+
+### Cakupan Bantuan AI
+
+- AI membantu nyusun fungsi `register`, `login_user`, `logout_user` yang menggantikan `LoginView`/`LogoutView` bawaan Django, termasuk logic `set_cookie`/`delete_cookie` untuk `last_login`.
+- AI membantu merancang mekanisme peran Editor lewat Django Group (`user.groups.filter(name="Editor").exists()`), termasuk membedakan `can_manage` (khusus superuser) dan `can_edit` (superuser + editor) di context view dan template.
+- AI membantu menyusun CSS tombol Star.
+
+### Keterbatasan AI yang Diidentifikasi
+
+- **AI sempat salah nebak tipe data primary key `Project`.** AI mengasumsikan `Project.id` sudah UUID dan nulis `<uuid:project_id>` di `urls.py`, padahal di database aku ternyata masih integer biasa. Ini baru ketahuan setelah aku menjalankan aplikasinya sendiri dan mendapat error `NoReverseMatch`, lalu aku coba ubah yang dari `uuid` ke `int`.
+- **AI melewatkan satu celah keamanan penting saat menambahkan peran Editor.** Saat nambahin pengecekan `is_superuser` untuk `edit_project`, AI gak sekaligus meriksa ulang `delete_project`, sehingga fungsi itu tetap cuma ngandelin `@login_required` tanpa cek `is_superuser`. Akibatnya, akun editor yang aku buat (`roisganteng`) ternyata masih bisa menghapus project nah bug ini aku temuin sendiri lewat pengujian manual langsung, bukan dikasih tau AI.
+- **AI tidak tahu isi database aku secara langsung** (misalnya status `is_superuser` akun tertentu, atau apakah Group "Editor" sudah benar-benar dibuat) — semua verifikasi itu aku lakukan sendiri lewat Django Admin dan aku laporkan hasilnya ke AI.
+
+### Penyesuaian Manual yang Dilakukan
+
+- aku bikin Group "Editor" secara manual lewat Django Admin, dan nge-assign akun `roisganteng` ke group itu untuk keperluan testing.
+- aku yang nemuin sendiri bug bahwa akun editor bisa menghapus project, lewat pengujian manual langsung (login sebagai editor, coba klik Delete), bukan dari analisis AI.
+- aku ngejalanin `makemigrations` dan `migrate` sendiri untuk field `starred_by` yang baru ditambahkan.
+- aku nguji tiap peran satu per satu secara manual: anonymous (redirect ke login), pengguna biasa (bisa star, tidak bisa edit/delete), editor (bisa edit, tidak bisa delete), dan superuser (bisa semua) lalu ngeverif tombol yang muncul/hilang sesuai peran di browser.
+- aku ngelaporin traceback error secara spesifik dan lengkap di tiap kegagalan (`TemplateDoesNotExist`, `NoReverseMatch`, `ImportError`), yang jadi dasar AI mendiagnosis lokasi bug-nya.
+- aku mutusin sendiri kapan pake pendekatan Group dibanding Permission Django untuk peran Editor, dan memutuskan tombol Delete disembunyikan total dari editor di UI (bukan cuma dibiarin menghasilkan 403).
+
+### Kesimpulan
+
+AI digunakan sebagai alat bantu untuk mempercepat penulisan kode autentikasi, dan permission berbasis peran, sekaligus membantu menjelaskan konsep di baliknya (session, cookie, CSRF, Group vs Permission). Namun, verifikasi tiap peran, pengujian manual di browser, identifikasi bug keamanan penting (celah delete pada editor), serta pengambilan keputusan akhir soal desain otorisasi tetap aku lakukan sendiri secara aktif. AI juga terbukti gak selalu benar di awal seperti contohnya ada celah keamanan yg dimana editor bisa menghapus projek, sehingga peran aku dalam menguji dan memvalidasi setiap perubahan menjadi bagian penting yang tidak bisa digantikan oleh AI.
