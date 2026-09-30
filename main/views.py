@@ -173,7 +173,11 @@ def register(request):
     form = UserCreationForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         form.save()
+<<<<<<< HEAD
         messages.success(request, "Account created successfully. Please login.")
+=======
+        messages.success(request, "Akun berhasil dibuat. Silakan login.")
+>>>>>>> 7aeb19a1be32e1ddc90be2175e322c6ac633bfb8
         return redirect("main:login")
     context = {
         "name": "Rois",
