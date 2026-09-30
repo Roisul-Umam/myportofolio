@@ -137,8 +137,8 @@
         const isStarredClass = project.is_starred ? " is-starred" : "";
         const starText = project.is_starred ? "Unstar" : "Star";
         const starTitle = project.star_count > 0
-            ? `Dibintangi oleh ${escapeHtml(project.starred_by_names)}`
-            : "Jadilah yang pertama memberi star";
+            ? `Starred by ${escapeHtml(project.starred_by_names)}`
+            : "Be the first to give star!";
 
         articleElement.innerHTML = `
             ${imageHtml}
