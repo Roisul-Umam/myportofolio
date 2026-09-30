@@ -96,8 +96,8 @@ class ProjectForm(ModelForm):
             raise ValidationError("Project name cannot be empty or contain only HTML tags.")
         return title
 
-    def clean_tech_stack(self):
-        return strip_tags(self.cleaned_data["tech_stack"]).strip()
+    def clean_tags(self):
+        return strip_tags(self.cleaned_data["tags"]).strip()
 
     def clean_description(self):
         return strip_tags(self.cleaned_data["description"]).strip()
