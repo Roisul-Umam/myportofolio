@@ -59,6 +59,11 @@ S1 Ilmu Komputer, Fakultas Ilmu Komputer, Universitas Indonesia
 2. JSON lebih ringkas, gakaya XML sebagai perbandingan, contoh XML = `<project><title>Rainfall data model</title><tech_stack>Python, Kaggle</tech_stack></project>` dan kalo JSON = `projects_json = serializers.serialize("json", projects)` trus yang kedua adalah native ke JS jd kalo nanti aku bikin fitur di FE yg fetch data dari API projects, tinggal pake JS fetch() aja nah nanti result JSON nya bisa langsung dipake sebagai object JS.
 3. Alur di view nya adalah kita ngetik misal `api/projects` trus nanti views nge return data dari database pake ORM trus nanti datanya di serialize dari py ke JSON nah nanti view nge return balik barupa response kayak `HttpResponse(data, content_type="application/json")`. Nah alasan kenapa harus pake serialize simplenya buat nge penerjemah yg ngubah objek python jadi format teks JSON supaya bisa dikirim lewat HTTP dan browser bisa ngerti itu.
 
+## Tugas 5
+1. Debouncing itu kayak ngasih jeda pas kita ngetik di fitur pencarian, nah kalo kita gapake debouncing, misal kita baru ketik satu huruf aja, browser bakal ngirim HTTP request ke server, nah ini yang bikin server jebol, jadi kalo kita kasih aja debouncing 300ms (0.3 detik), pas kita beres ngetik, si browser baru ngirim request, nah ini yang bikin aman, jadinya server gabakal jebol.
+2. Fungsi `await` pada `fetch()` adalah buat nunda eksekusi baris kode selanjutnya sampe proses pengambilan data dari server selesai, sehingga data tersebut siap dipakaii.
+3. Misal ada yg nambahin project, trus nama projectnya `<script>alert('Akun kamu di-hack!');</script>`, kalo django, dia otomatis bakal ngubah kodenya jadi teks mentah (`&lt;script&gt;`) nah jadinya si script itu gabakal dijalanin, jatohnya kaya teks biasa. Beda nih kalo di AJAX/JS, browser bakal ngira itu instruksi resmi, jadinya dia bakal ngejalanin kode tersebut saat itu juga.
+
 ## AI Disclosure Tugas 1 & 2
 
 Bagian *"Skills & Projects"* pada portofolio ini dikembangkan dengan bantuan AI assistant (Claude, Anthropic) untuk mempercepat proses penulisan HTML dan CSS awal.
@@ -142,3 +147,31 @@ AI membantu aku untuk mengimplementasikan sistem autentikasi, session/cookie (`l
 ### Kesimpulan
 
 AI digunakan sebagai alat bantu untuk mempercepat penulisan kode autentikasi, dan permission berbasis peran, sekaligus membantu menjelaskan konsep di baliknya (session, cookie, CSRF, Group vs Permission). Namun, verifikasi tiap peran, pengujian manual di browser, identifikasi bug keamanan penting (celah delete pada editor), serta pengambilan keputusan akhir soal desain otorisasi tetap aku lakukan sendiri secara aktif. AI juga terbukti gak selalu benar di awal seperti contohnya ada celah keamanan yg dimana editor bisa menghapus projek, sehingga peran aku dalam menguji dan memvalidasi setiap perubahan menjadi bagian penting yang tidak bisa digantikan oleh AI.
+
+## AI Disclosure Tugas 5
+
+AI membantu aku untuk menyelesaikan Tugas 5, khususnya pada bagian memastikan perlindungan XSS pada aplikasi portofolio Django ini. Struktur dasar halaman Projects (fetch, search debounce, modal popover, toast.js) aku bangun sendiri mengikuti tutorial PBP, lalu AI membantu menjelaskan flow web portofolio aku yang sekarang.
+
+### Cakupan Bantuan AI
+
+- AI membantu menemukan penyebab error `OperationalError: no such table: main_project_starred_by` dan mengarahkan aku untuk menjalankan `migrate` di database lokal.
+- AI membantu menambahkan lapisan perlindungan XSS tambahan (`isSafeUrl()` untuk memvalidasi skema URL sebelum dirender sebagai `href`/`src`), serta memverifikasi bahwa `escapeHtml()` sudah dipasang di semua field dinamis.
+- AI membantu mengganti `confirm()` bawaan browser pada tombol Delete dengan modal glassmorphism yang sudah ada di tema, supaya UX-nya konsisten.
+
+### Keterbatasan AI yang Diidentifikasi
+
+- **AI mengulangi kesalahan yang sama soal asumsi nama field.** Setelah sebelumnya salah asumsi `Project.id` berupa UUID, AI lagi-lagi salah asumsi field model bernama `tech_stack`/`project_url`, padahal nama aslinya `tags`/`link`. Ini baru ketahuan pas aku buka `/api/projects/` sendiri dan ngebandingin field JSON yang sebenarnya dengan kode JavaScript-nya.
+- **AI tidak bisa menjalankan aplikasi atau membuka DevTools sendiri.** Semua diagnosis (traceback, isi `innerHTML` kartu project, hasil `/api/projects/`) bergantung sepenuhnya pada aku yang harus mencari tahu sendiri error pada link dan tags yang tidak muncul di card project.
+- **AI sempat tidak menyadari ada kode mati (dead code) dan duplikasi fungsi `escapeHtml`** di `projects.html` aku baru sadar bahwa ada dua fungsi escapeHtml dan itu bikin aku keinget bahwa fungsi escapeHtml yang satunya adalah bekas kode lama.
+
+### Penyesuaian Manual yang Dilakukan
+
+- aku nulis sendiri `create_project_ajax`, termasuk validasi `ModelForm`, response JSON dengan status 201/400/403, dan pengecekan `is_superuser` di server bukan hasil generate AI.
+- aku ngejalanin `migrate` sendiri untuk memperbaiki tabel `starred_by` yang belum ada di database lokal.
+- aku ngelakuin debugging manual lewat DevTools: membuka tab Console untuk mengecek `innerHTML` kartu project, membuka tab Network untuk memverifikasi debouncing search benar-benar mengirim satu request setelah berhenti mengetik, dan membuka `/api/projects/` langsung untuk membandingkan nama field JSON dengan kode JavaScript.
+- aku ngelakuin pengujian XSS manual: nyobain payload kaya `<img src=x onerror=alert('XSS')>` dan `javascript:alert('XSS')` di field title dan link, termasuk menggunakan Django shell untuk lewatin validasi form pas pengen nguji proteksi `isSafeUrl()` secara spesifik.
+- aku uji ulang halaman Projects di jendela Incognito untuk memastikan bug yang dilaporkan bukan karena cache browser, sebelum lanjutin debugging lebih dalam.
+
+### Kesimpulan
+
+AI kebanyakan ngebantuin aku dalam proses debugging di Tugas 5 ini, terutama buat error yang traceback-nya rumit. Tapi, implementasi inti seperti `create_project_ajax` aku tulis sendiri, dan hampir semua bug yang ditemukan baru bisa didiagnosis setelah aku ngelakuin investigasi manual dulu (buka DevTools, ngecek `/api/projects/`, jalanin migrasi, uji di Incognito). AI sendiri terbukti beberapa kali salah asumsi soal struktur data di proyekku, sehingga peran aku dalam ngeverifikasi setiap klaim AI dengan bukti nyata dari browser dan terminal menjadi bagian yang tidak tergantikan dari proses pengerjaan tugas ini.
