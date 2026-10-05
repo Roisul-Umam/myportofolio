@@ -1,0 +1,89 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contacts</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.11/dist/htmx.min.js"></script>
+    <link rel="stylesheet" href="{% static 'contacts/css/style.css' %}">
+</head>
+<div id="htmx-confirm-modal" class="confirm-modal">
+    <div class="confirm-modal__backdrop"></div>
+    <div class="confirm-modal__content">
+        <p id="htmx-confirm-message"></p>
+        <div class="confirm-modal__actions">
+            <button type="button" class="button button-secondary" id="htmx-confirm-cancel">Batal</button>
+            <button type="button" class="button button-danger" id="htmx-confirm-ok">Ya, Hapus</button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    const modal = document.getElementById('htmx-confirm-modal');
+    const message = document.getElementById('htmx-confirm-message');
+    const btnCancel = document.getElementById('htmx-confirm-cancel');
+    const btnOk = document.getElementById('htmx-confirm-ok');
+    let pendingRequest = null;
+
+    document.body.addEventListener('htmx:confirm', function (evt) {
+        if (!evt.detail.question) return;
+        evt.preventDefault();
+        message.textContent = evt.detail.question;
+        modal.classList.add('is-open');
+        pendingRequest = evt.detail.issueRequest;
+    });
+
+    btnCancel.addEventListener('click', function () {
+        modal.classList.remove('is-open');
+        pendingRequest = null;
+    });
+
+    btnOk.addEventListener('click', function () {
+        modal.classList.remove('is-open');
+        if (pendingRequest) pendingRequest(true);
+        pendingRequest = null;
+    });
+})();
+</script>
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    <div class="container">
+        <h1>Add Contact</h1>
+        <div class="card">
+            <form class="add-form"
+                  hx-post="{% url 'contacts:contact_add' %}"
+                  hx-target="#contact-rows"
+                  hx-swap="innerHTML"
+                  hx-on::after-request="if (event.detail.successful) this.reset()">
+                {% csrf_token %}
+                <input type="text" name="name" placeholder="Name" required>
+                <input type="email" name="email" placeholder="Email" required>
+                <button type="submit" class="button">Add Contact</button>
+            </form>
+        </div>
+
+        <h1>Contact List</h1>
+        <div class="card">
+            <div class="search-wrap">
+                <input type="search" name="q" placeholder="Search contacts..."
+                       hx-get="{% url 'contacts:contact_search' %}"
+                       hx-trigger="keyup changed delay:300ms, search"
+                       hx-target="#contact-rows"
+                       hx-indicator="#search-indicator">
+                <span id="search-indicator" class="htmx-indicator">Searching...</span>
+            </div>
+
+            <table>
+                <thead><tr><th>Name</th><th>Email</th><th></th></tr></thead>
+                <tbody id="contact-rows">
+                    {% include "contacts/_contact_rows.html" %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
