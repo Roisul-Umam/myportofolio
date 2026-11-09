@@ -64,6 +64,17 @@ S1 Ilmu Komputer, Fakultas Ilmu Komputer, Universitas Indonesia
 2. Fungsi `await` pada `fetch()` adalah buat nunda eksekusi baris kode selanjutnya sampe proses pengambilan data dari server selesai, sehingga data tersebut siap dipakaii.
 3. Misal ada yg nambahin project, trus nama projectnya `<script>alert('Akun kamu di-hack!');</script>`, kalo django, dia otomatis bakal ngubah kodenya jadi teks mentah (`&lt;script&gt;`) nah jadinya si script itu gabakal dijalanin, jatohnya kaya teks biasa. Beda nih kalo di AJAX/JS, browser bakal ngira itu instruksi resmi, jadinya dia bakal ngejalanin kode tersebut saat itu juga.
 
+## Tugas 6
+
+1. REST itu model arsitektur API buat web. Data dianggap *resource* dengan URL sendiri (misal `/api/v1/experience/<id>/`), operasinya ditentuin oleh method HTTP (GET baca, POST buat, PUT/PATCH ubah, DELETE hapus), server itu sifatnya *stateless*, trus hasilnya dijelasin lewat status code yang bermakna. Mengembalikan JSON saja belum cukup karena JSON hanyalah format data. Endpoint seperti `/hapusExperience/?id=3` yang selalu pake POST dan membalas `200 OK` walaupun gagal tetep ngembaliin JSON, tapi bukan RESTful.
+`PUT` ituu ngeganti seluruh resource, jadi semua field wajib dikirim (di API-ku, PUT yang cuma ngirim `title` ditolak dengan 400). `PATCH` cuma ngubah field yang dikirim. Kalau Editor cuma mau ngebenerin typo judul, cukup `PATCH {"title": "..."}`. `PUT` cocok kalau form selalu ngirim ulang semua isi data.
+
+2. Serializer itu jembatan antara objek model dan JSON: mengubah objek `Experience` jadi data buat respons (termasuk field itungan kayak `star_count`), dan ngevalidasi input klien sebelum disimpen. Dibanding ngerakit dictionary manual dengan `JsonResponse` di Tutorial 05, validasi, pembersihan input (`strip_tags`), aturan read-only, dan format error 400 ada di satu tempat dan dipake bareng oleh semua endpoint. Kalau manual, logikanya harus diulang di tiap view, dan jadi gampang lupa buat ngevalidasi atau gak sengaja ngebocorin field sensitif seperti email.
+
+3. Autentikasi menjawab "kamu siapa?" (di sini `SessionAuthentication` mengisi `request.user` dari sesi login). Si Autentikasi ngejawab "kamu boleh ngapain?" (di sini `IsPortfolioOwnerOrEditorOrReadOnly`: Editor boleh PUT/PATCH, hanya pemilik yang boleh ngebuat dan ngehapus). Hak akses harus dicek di server karena menyembunyikan tombol hanya mengatur tampilan. Siapa pun tetap bisa mengirim request langsung ke endpoint lewat `curl` atau DevTools, jadi yang benar-benar melindungi data ituu permission class.
+
+4. `SessionAuthentication` pake cookie sesi yang dikirim browser otomatis di setiap request, termasuk request dari situs lain. Tanpa token CSRF, situs jahat bisa membuat browser pengguna yang sedang login mengirim POST/PUT/PATCH/DELETE ke API kita. Token di header `X-CSRFToken` cuma bisa dibaca page dari origin kita, sehingga request tanpa token ditolak dengan 403. `force_authenticate` mengisi `request.user` langsung trus ngelewatin autentikasi sesi beserta pengecekan CSRF-nya, jadi test dengan `force_authenticate` tetap lulus walau CSRF rusak. Itulah kenapa aku nambahin test `APIClient(enforce_csrf_checks=True)` + `.login()` buat ngebuktiin request tanpa token ditolak dan yang make token diterima.
+
 ## AI Disclosure Tugas 1 & 2
 
 Bagian *"Skills & Projects"* pada portofolio ini dikembangkan dengan bantuan AI assistant (Claude, Anthropic) untuk mempercepat proses penulisan HTML dan CSS awal.
@@ -171,6 +182,32 @@ AI membantu aku untuk menyelesaikan Tugas 5, khususnya pada bagian memastikan pe
 - aku ngelakuin debugging manual lewat DevTools: membuka tab Console untuk mengecek `innerHTML` kartu project, membuka tab Network untuk memverifikasi debouncing search benar-benar mengirim satu request setelah berhenti mengetik, dan membuka `/api/projects/` langsung untuk membandingkan nama field JSON dengan kode JavaScript.
 - aku ngelakuin pengujian XSS manual: nyobain payload kaya `<img src=x onerror=alert('XSS')>` dan `javascript:alert('XSS')` di field title dan link, termasuk menggunakan Django shell untuk lewatin validasi form pas pengen nguji proteksi `isSafeUrl()` secara spesifik.
 - aku uji ulang halaman Projects di jendela Incognito untuk memastikan bug yang dilaporkan bukan karena cache browser, sebelum lanjutin debugging lebih dalam.
+
+### Kesimpulan
+
+AI kebanyakan ngebantuin aku dalam proses debugging di Tugas 5 ini, terutama buat error yang traceback-nya rumit. Tapi, implementasi inti seperti `create_project_ajax` aku tulis sendiri, dan hampir semua bug yang ditemukan baru bisa didiagnosis setelah aku ngelakuin investigasi manual dulu (buka DevTools, ngecek `/api/projects/`, jalanin migrasi, uji di Incognito). AI sendiri terbukti beberapa kali salah asumsi soal struktur data di proyekku, sehingga peran aku dalam ngeverifikasi setiap klaim AI dengan bukti nyata dari browser dan terminal menjadi bagian yang tidak tergantikan dari proses pengerjaan tugas ini.
+
+## AI Disclosure Tugas 6
+
+AI (Claude) bantuin aku menyelesaikan Tugas 6, yaitu menerapkan Django REST Framework pada bagian Experience di portofolioku. Aku memberikan beberapa instruksi Tugas 6 lalu meminta AI membuat membantu menerapkannya pada projek aku. Strategi promptingku adalah memberi spesifikasi lengkap, lalu mengoreksi AI saat arahnya salah, misalnya saat ia memilih model yang keliru.
+
+### Cakupan Bantuan AI
+
+- AI membantu membuat `ExperienceSerializer` dengan field eksplisit, field hitungan read-only (`star_count`, `is_starred`, `is_ongoing`), dan validasi `validate_<field>` yang memakai `strip_tags`.
+- AI membantu membuat API view berbasis fungsi untuk daftar, detail, dan star di `main/api_views.py`, memakai `IsPortfolioOwnerOrEditorOrReadOnly`, beserta route di `main/api_urls.py`.
+- AI membantu menulis ulang `experience.html` agar menampilkan, mencari, menambah, mengedit (PATCH lewat modal), memberi star, dan menghapus data lewat `fetch()` ke API, lengkap dengan toast untuk error 400/403 dan header `X-CSRFToken`.
+
+### Keterbatasan AI yang Diidentifikasi
+
+- **AI tidak bisa menjalankan kodenya.** Lingkungan AI tidak memiliki Django, jadi semua kode, template, dan test hanya dicek sintaksnya dan belum pernah dieksekusi. Aku harus menjalankan `python manage.py test main` dan mencoba halaman di browser sendiri untuk memastikan semuanya benar.
+- **AI tidak melihat test lama yang sudah tidak sesuai dengan template.** Beberapa test halaman Experience masih menganggap data dirender oleh template, padahal setelah integrasi API kartunya dirender oleh JavaScript.
+
+### Penyesuaian Manual yang Dilakukan
+
+- Aku memperbaiki test halaman yang tidak sesuai dengan template, supaya cocok dengan isi halaman yang sekarang.
+- Aku mengubah test yang memeriksa data pada halaman Experience, supaya datanya diperiksa lewat endpoint API, bukan dari HTML halaman.
+- Aku menjalankan `python manage.py test main` dan `runserver`, lalu mencoba halaman Experience sebagai pengunjung, pengguna biasa, Editor, dan superuser.
+- Aku memeriksa dan merapikan kode dari AI sebelum di-commit secara bertahap.
 
 ### Kesimpulan
 

@@ -36,11 +36,13 @@ class MainTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "experience.html")
-        self.assertContains(response, self.experience.title)
-        self.assertContains(response, self.experience.description)
-        self.assertContains(response, "Part-Time")
-        self.assertContains(response, "Sedang berlangsung")
         self.assertContains(response, f'href="{reverse("main:show_main")}"')
+
+        data = self.client.get(reverse("api:experience-list")).json()
+        self.assertEqual(data[0]["title"], self.experience.title)
+        self.assertEqual(data[0]["description"], self.experience.description)
+        self.assertEqual(data[0]["category_display"], "Part-Time")
+        self.assertTrue(data[0]["is_ongoing"])
 
     def test_empty_experience_page(self):
         Experience.objects.all().delete()
@@ -51,11 +53,10 @@ class MainTest(TestCase):
     def test_completed_experience(self):
         self.experience.ended_at = timezone.now()
         self.experience.save()
-        response = self.client.get(reverse("main:show_experience"))
+        data = self.client.get(reverse("api:experience-list")).json()
 
         self.assertFalse(self.experience.is_ongoing)
-        self.assertContains(response, "Selesai")
-        self.assertNotContains(response, "Sedang berlangsung")
+        self.assertFalse(data[0]["is_ongoing"])
         
 class ProjectViewTest(TestCase):
     def setUp(self):
@@ -68,19 +69,29 @@ class ProjectViewTest(TestCase):
         self.assertTemplateUsed(response, 'projects.html')  
 
     def test_projects_view_with_data(self):
-        Project.objects.create(
+        project = Project.objects.create(
             title="Portfolio Website",
             description="Website portofolio dengan Django",
             tags="Django, Python",
             link="https://github.com/example/portfolio"
         )
-        
+
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Portfolio Website")
-        self.assertContains(response, "Website portofolio dengan Django")
-        
+        self.assertTemplateUsed(response, 'projects.html')
+
+        api_response = self.client.get(
+            reverse('api:project-list')
+        )
+
+        self.assertEqual(api_response.status_code, 200)
+
+        data = api_response.json()
+
+        self.assertEqual(data[0]["title"], project.title)
+        self.assertEqual(data[0]["description"], project.description)
+
     def test_projects_view_empty_state(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "No projects added yet.")
+        self.assertContains(response, "No projects found.")
