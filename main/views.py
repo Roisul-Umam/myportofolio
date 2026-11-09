@@ -53,7 +53,8 @@ def show_experience(request):
     context = {
         "name": "Rois",
         "short_name": "Rois",
-        "experience_list": Experience.objects.all(),
+        "category_choices": Experience.EXPERIENCE_CHOICES,
+        "can_edit": request.user.is_superuser or user_is_editor(request.user),
         "navigation_links": [
                     {"name": "Profile", "url_name": "main:show_main"},
                     {"name": "Experience", "url_name": "main:show_experience"},
