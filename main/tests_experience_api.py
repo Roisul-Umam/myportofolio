@@ -5,6 +5,7 @@ from django.contrib.auth.models import Group, User
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework import status
+from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient, APITestCase
 
 from main.models import Experience
@@ -317,3 +318,46 @@ class ExperienceCSRFAPITest(ExperienceAPITestBase):
         response = client.post(self.list_url, self.payload, format="json", HTTP_X_CSRFTOKEN=token)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Experience.objects.count(), 2)
+
+
+class ExperienceTokenAPITest(ExperienceAPITestBase):
+    """Klien mobile menulis data Experience memakai header Authorization: Token."""
+
+    def token_client(self, user):
+        client = APIClient(enforce_csrf_checks=True)
+        client.credentials(HTTP_AUTHORIZATION=f"Token {Token.objects.create(user=user).key}")
+        return client
+
+    def test_owner_can_create_with_token_without_csrf(self):
+        response = self.token_client(self.owner).post(self.list_url, self.payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["category_display"], "Internship")
+        self.assertTrue(response.data["is_ongoing"])
+
+    def test_owner_can_delete_with_token(self):
+        response = self.token_client(self.owner).delete(self.detail_url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Experience.objects.filter(pk=self.experience.pk).exists())
+
+    def test_regular_user_token_cannot_create(self):
+        response = self.token_client(self.regular).post(self.list_url, self.payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertExperienceUnchanged()
+
+    def test_invalid_token_is_rejected_with_401(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Token token-palsu")
+        response = self.client.post(self.list_url, self.payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertExperienceUnchanged()
+
+    def test_create_rejects_end_date_before_today(self):
+        payload = {**self.payload, "ended_at": (timezone.now() - timedelta(days=2)).isoformat()}
+        response = self.token_client(self.owner).post(self.list_url, payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("ended_at", response.data)
+
+    def test_create_accepts_future_end_date(self):
+        payload = {**self.payload, "ended_at": (timezone.now() + timedelta(days=30)).isoformat()}
+        response = self.token_client(self.owner).post(self.list_url, payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertFalse(response.data["is_ongoing"])

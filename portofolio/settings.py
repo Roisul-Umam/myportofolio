@@ -30,7 +30,8 @@ SECRET_KEY = 'django-insecure-2tst8)*%dtrnc1r012p7o9bk9@+*z8zu0+7l&aij!b&&!y-z-q
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "roisul-umam-myportofolio.pws.cs.ui.ac.id"]
+# 10.0.2.2 adalah alamat laptop dari dalam emulator Android (aplikasi Flutter).
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "10.0.2.2", "roisul-umam-myportofolio.pws.cs.ui.ac.id"]
 
 PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
 

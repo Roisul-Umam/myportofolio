@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.utils.html import strip_tags
 from rest_framework import serializers
 from main.forms import convert_drive_link_to_thumbnail
@@ -92,6 +93,9 @@ class ExperienceSerializer(serializers.ModelSerializer):
         return convert_drive_link_to_thumbnail(value)
 
     def validate_ended_at(self, value):
-        if value and self.instance and value < self.instance.started_at:
+        # started_at memakai auto_now_add, jadi untuk data baru tanggal mulainya
+        # adalah saat request ini diproses.
+        started_at = self.instance.started_at if self.instance else timezone.now()
+        if value and value < started_at:
             raise serializers.ValidationError("End date cannot be earlier than the start date.")
         return value
