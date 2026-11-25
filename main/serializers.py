@@ -1,7 +1,7 @@
 from django.utils.html import strip_tags
 from rest_framework import serializers
 from main.forms import convert_drive_link_to_thumbnail
-from main.models import Project
+from main.models import Experience, Project
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -44,3 +44,54 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     def validate_project_image_url(self, value):
         return convert_drive_link_to_thumbnail(value)
+    
+class ExperienceSerializer(serializers.ModelSerializer):
+    category_display = serializers.CharField(source="get_category_display", read_only=True)
+    is_ongoing = serializers.BooleanField(read_only=True)
+    star_count = serializers.SerializerMethodField()
+    is_starred = serializers.SerializerMethodField()
+    starred_by_names = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Experience
+        fields = [
+            "id", "title", "description", "category", "category_display",
+            "thumbnail", "started_at", "ended_at", "is_ongoing",
+            "star_count", "is_starred", "starred_by_names",
+        ]
+        read_only_fields = [
+            "id", "started_at", "category_display", "is_ongoing",
+            "star_count", "is_starred", "starred_by_names",
+        ]
+
+    def get_star_count(self, obj):
+        return len(obj.starred_by.all())
+
+    def get_is_starred(self, obj):
+        request = self.context.get("request")
+        if request is None or not request.user.is_authenticated:
+            return False
+        return any(user.pk == request.user.pk for user in obj.starred_by.all())
+
+    def get_starred_by_names(self, obj):
+        return ", ".join(user.username for user in obj.starred_by.all())
+
+    def validate_title(self, value):
+        value = strip_tags(value).strip()
+        if not value:
+            raise serializers.ValidationError("Title cannot be empty or contain only HTML tags.")
+        return value
+
+    def validate_description(self, value):
+        value = strip_tags(value).strip()
+        if not value:
+            raise serializers.ValidationError("Description cannot be empty or contain only HTML tags.")
+        return value
+
+    def validate_thumbnail(self, value):
+        return convert_drive_link_to_thumbnail(value)
+
+    def validate_ended_at(self, value):
+        if value and self.instance and value < self.instance.started_at:
+            raise serializers.ValidationError("End date cannot be earlier than the start date.")
+        return value
